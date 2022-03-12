@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/EmL01/jwt-access-refresh-authentication#readme",
   "dependencies": {
-    "express": "^4.17.3"
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

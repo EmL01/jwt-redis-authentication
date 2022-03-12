@@ -14,39 +14,23 @@ app.post('/login', async (req, res) => {
     try {
         const user_id = '1'
         const payload = { user_id }
-        const accessTokenOptions = {
-            issuer: JWT_ISSUER,
-            audience: user_id,
-            expiresIn: '10m'
-        }
-        const refreshTokenOptions = {
+        const options = {
             issuer: JWT_ISSUER,
             audience: user_id,
             expiresIn: '1y'
         }
-        const accessToken = await jwt.sign(payload, JWT_SECRET, accessTokenOptions)
-        const refreshToken = await jwt.sign(payload, JWT_SECRET, refreshTokenOptions)
-        return res.json({ accessToken, refreshToken })
+        const token = await jwt.sign(payload, JWT_SECRET, options)
+        return res.json({ token })
     } catch (err) {
         return res.json({ msg: err.message })
     }
 })
 
-app.post('/token/blacklist/:access_token', async (req, res) => {
+app.post('/token/blacklist/:token', async (req, res) => {
     //Should be fetched from User in db
-    const { access_token } = req.params
-    await client.set(access_token, access_token)
-    return res.json({ msg: `Access token ${access_token} successfully blacklisted` })
-})
-
-app.post('/token/blacklist_all', async (req, res) => {
-    //Should be fetched from User in db
-    const token = process.env.REFRESH_TOKEN
-    if(await client.get(token)) {
-        return res.json({ msg: 'Refresh token already blacklisted' })
-    }
-    await client.set(token, token)
-    return res.json({ msg: `Refresh token ${token} successfully blacklisted` })
+    const { token } = req.params
+    await client.set(token, token, { 'EX': 365*24*60*60 })
+    return res.json({ msg: `Token ${token} successfully blacklisted` })
 })
 
 app.get('/protected', checkAuth, (req, res) => {
@@ -60,5 +44,4 @@ app.listen(PORT, async () => {
     client.on('error', (err) => console.log('Redis Client Error', err));
 
     await client.connect();
-    await client.set('key', 'value')
 })

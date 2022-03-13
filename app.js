@@ -5,10 +5,23 @@ const express = require('express'),
     jwt = require('jsonwebtoken'),
     redis = require('redis'),
     checkAuth = require('./checkAuth'),
+    Fingerprint = require('express-fingerprint'),
     JWT_ISSUER = process.env.JWT_ISSUER,
     JWT_SECRET = process.env.JWT_SECRET
 
 let client;
+
+app.use(Fingerprint({
+    parameters: [
+        Fingerprint.useragent,
+        Fingerprint.acceptHeaders,
+        Fingerprint.geoip,
+    ]
+}))
+
+app.get('/', async (req, res) => {
+    return res.send(JSON.stringify(req.fingerprint))
+})
 
 app.post('/login', async (req, res) => {
     try {

@@ -11,16 +11,20 @@ const express = require('express'),
 
 let client;
 
-app.use(Fingerprint({
-    parameters: [
-        Fingerprint.useragent,
-        Fingerprint.acceptHeaders,
-        Fingerprint.geoip,
-    ]
-}))
+var users = []
+
+app.use(Fingerprint())
 
 app.get('/', async (req, res) => {
+    users.push(req.fingerprint)
     return res.send(JSON.stringify(req.fingerprint))
+})
+
+app.get('/devices', (req, res) => {
+    const hashes = users.map(el => el.hash)
+    const devices = users.map(el => el.components.useragent.device)
+    const os = users.map(el => el.components.useragent.os)
+    return res.json({ hashes, devices, os })
 })
 
 app.post('/login', async (req, res) => {
